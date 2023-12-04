@@ -1,5 +1,4 @@
 #include <cctype>
-#include <cstddef>
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -7,50 +6,54 @@
 #include <string>
 #include <utility>
 
-std::map<std::string, int> word_to_digit = {
-    {"one", 1}, {"two", 2},   {"three", 3}, {"four", 4}, {"five", 5},
-    {"six", 6}, {"seven", 7}, {"eight", 8}, {"nine", 9}};
+std::map<std::string, char> word_to_digit = {
+    {"one", '1'}, {"two", '2'},   {"three", '3'}, {"four", '4'}, {"five", '5'},
+    {"six", '6'}, {"seven", '7'}, {"eight", '8'}, {"nine", '9'}};
 
 std::pair<char, char> findDigits(const std::string &line) {
-  char firstDigit = '0', lastDigit = '0';
-  std::string result;
-  size_t pos = 0;
-
-  // Replace words with digits and form the result string
-  while (pos < line.length()) {
-    bool isReplaced = false;
-    for (const auto &pair : word_to_digit) {
-      if (line.compare(pos, pair.first.length(), pair.first) == 0) {
-        result += std::to_string(pair.second);
-        pos += pair.first.length();
-        isReplaced = true;
-        break;
-      }
-    }
-    if (!isReplaced) {
-      result += line[pos++];
-    }
+  if (line.empty()) {
+    return {'0', '0'}; // Return default values if the string is empty
   }
 
-  // Find the first digit
-  for (char c : result) {
-    if (std::isdigit(c)) {
-      firstDigit = c;
-      break;
-    }
-  }
-
-  // Find the last digit
-  for (auto it = result.rbegin(); it != result.rend(); ++it) {
-    if (std::isdigit(*it)) {
-      lastDigit = *it;
-      break;
-    }
-  }
-
-  std::cout << line << " --> " << "[" << firstDigit << "," << lastDigit << "]" << std::endl;
+  char firstDigit = line.front();
+  char lastDigit = line.back();
 
   return {firstDigit, lastDigit};
+}
+
+std::pair<char, char> replaceWordsWithNumbers(const std::string &input) {
+  std::string result;
+  std::string currentWord;
+
+  for (char ch : input) {
+    if (std::isalpha(ch)) {
+      currentWord += ch;
+      if (word_to_digit.find(currentWord) != word_to_digit.end()) {
+        result += word_to_digit[currentWord];
+        currentWord.clear();
+      }
+    } else {
+      if (!currentWord.empty() &&
+          word_to_digit.find(currentWord) != word_to_digit.end()) {
+        result += word_to_digit[currentWord];
+      }
+      currentWord.clear();
+      if (std::isdigit(ch)) {
+        result += ch;
+      }
+    }
+  }
+
+  if (!currentWord.empty() &&
+      word_to_digit.find(currentWord) != word_to_digit.end()) {
+    result += word_to_digit[currentWord];
+  }
+
+  std::pair<char, char> digits = findDigits(result);
+
+  std::cout << "[" << digits.first << "," << digits.second << "]" << std::endl;
+
+  return digits;
 }
 
 int main() {
@@ -65,6 +68,7 @@ int main() {
 
   while (getline(file, line)) {
     auto [firstDigit, lastDigit] = findDigits(line);
+
     if (firstDigit != '0' && lastDigit != '0') {
       int value = (firstDigit - '0') * 10 + (lastDigit - '0');
       sum += value;
@@ -74,4 +78,3 @@ int main() {
   std::cout << "Total sum: " << sum << std::endl;
   return 0;
 }
-
