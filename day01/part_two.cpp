@@ -5,9 +5,7 @@
 #include <vector>
 
 // Array of digit representations
-const std::string digits[] = {
-    "0",   "1",   "2",     "3",    "4",    "5",   "6",     "7",     "8",   "9",
-    "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"};
+const std::string digits[] = { "0",   "1",   "2",     "3",    "4",    "5",   "6",     "7",     "8",   "9", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"};
 
 // Convert string to digit
 int64_t to_digit(const std::string &str) {
@@ -49,7 +47,7 @@ int64_t spelled_out(const std::string &document) {
 
 int main() {
   // File input
-  std::ifstream file("calibration_values.txt");
+  std::ifstream file("input.prod");
   if (!file) {
     std::cerr << "Error opening file 'input.txt'" << std::endl;
     return 1;
@@ -62,4 +60,3 @@ int main() {
 
   return 0;
 }
-
