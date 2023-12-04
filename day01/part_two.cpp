@@ -1,80 +1,65 @@
-#include <cctype>
 #include <fstream>
 #include <iostream>
-#include <map>
-#include <ostream>
+#include <sstream>
 #include <string>
-#include <utility>
+#include <vector>
 
-std::map<std::string, char> word_to_digit = {
-    {"one", '1'}, {"two", '2'},   {"three", '3'}, {"four", '4'}, {"five", '5'},
-    {"six", '6'}, {"seven", '7'}, {"eight", '8'}, {"nine", '9'}};
+// Array of digit representations
+const std::string digits[] = {
+    "0",   "1",   "2",     "3",    "4",    "5",   "6",     "7",     "8",   "9",
+    "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"};
 
-std::pair<char, char> findDigits(const std::string &line) {
-  if (line.empty()) {
-    return {'0', '0'}; // Return default values if the string is empty
+// Convert string to digit
+int64_t to_digit(const std::string &str) {
+  for (size_t i = 0; i < std::size(digits); ++i) {
+    if (str.find(digits[i]) == 0) {
+      return (i >= 10) ? i - 9 : i;
+    }
   }
-
-  char firstDigit = line.front();
-  char lastDigit = line.back();
-
-  return {firstDigit, lastDigit};
+  return -1;
 }
 
-std::pair<char, char> replaceWordsWithNumbers(const std::string &input) {
-  std::string result;
-  std::string currentWord;
+// Main function to process the document
+int64_t spelled_out(const std::string &document) {
+  int64_t total = 0;
+  std::istringstream iss(document);
+  std::string line;
 
-  for (char ch : input) {
-    if (std::isalpha(ch)) {
-      currentWord += ch;
-      if (word_to_digit.find(currentWord) != word_to_digit.end()) {
-        result += word_to_digit[currentWord];
-        currentWord.clear();
+  while (std::getline(iss, line)) {
+    int64_t first = -1, last = -1;
+
+    for (size_t i = 0; i < line.length(); ++i) {
+      for (size_t j = 1; j <= line.length() - i; ++j) {
+        int64_t digit = to_digit(line.substr(i, j));
+        if (digit != -1) {
+          if (first == -1)
+            first = digit;
+          last = digit;
+        }
       }
-    } else {
-      if (!currentWord.empty() &&
-          word_to_digit.find(currentWord) != word_to_digit.end()) {
-        result += word_to_digit[currentWord];
-      }
-      currentWord.clear();
-      if (std::isdigit(ch)) {
-        result += ch;
-      }
+    }
+
+    if (first != -1 && last != -1) {
+      total += first * 10 + last;
     }
   }
 
-  if (!currentWord.empty() &&
-      word_to_digit.find(currentWord) != word_to_digit.end()) {
-    result += word_to_digit[currentWord];
-  }
-
-  std::pair<char, char> digits = findDigits(result);
-
-  std::cout << "[" << digits.first << "," << digits.second << "]" << std::endl;
-
-  return digits;
+  return total;
 }
 
 int main() {
+  // File input
   std::ifstream file("calibration_values.txt");
-  if (!file.is_open()) {
-    std::cerr << "Failed to open the input file" << std::endl;
+  if (!file) {
+    std::cerr << "Error opening file 'input.txt'" << std::endl;
     return 1;
   }
 
-  std::string line;
-  int sum = 0;
+  std::string document((std::istreambuf_iterator<char>(file)),
+                       std::istreambuf_iterator<char>());
 
-  while (getline(file, line)) {
-    auto [firstDigit, lastDigit] = findDigits(line);
+  std::cout << "Total: " << spelled_out(document) << std::endl;
 
-    if (firstDigit != '0' && lastDigit != '0') {
-      int value = (firstDigit - '0') * 10 + (lastDigit - '0');
-      sum += value;
-    }
-  }
-
-  std::cout << "Total sum: " << sum << std::endl;
   return 0;
 }
+
