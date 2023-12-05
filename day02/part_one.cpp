@@ -26,24 +26,31 @@ struct Game {
                 << "Blue: " << rounds[i].blue << std::endl;
     }
   }
+
+  int64_t is_game_possible(int max_red, int max_green, int max_blue) {
+    for (auto &round : rounds) {
+      if (round.red > max_red || round.green > max_green ||
+          round.blue > max_blue) {
+        return 0;
+      }
+    }
+    return id;
+  }
 };
 
 int64_t extract_number(const std::string &round_info, const std::string &color) {
   size_t pos = round_info.find(color);
   if (pos != std::string::npos) {
-    // Find the start of the number preceding the color
     int i = pos - 1;
     while (i >= 0 && std::isspace(round_info[i])) {
       --i;
     }
 
-    // Now find the end of the number (which is the start of our search)
     int start = i;
     while (start >= 0 && std::isdigit(round_info[start])) {
       --start;
     }
 
-    // Extract the number
     std::string number_str = round_info.substr(start + 1, i - start);
     int number = std::stoi(number_str);
 
@@ -52,19 +59,19 @@ int64_t extract_number(const std::string &round_info, const std::string &color) 
   return 0;
 }
 
-void process_line(const std::string &line) {
+int64_t process_line(const std::string &line) {
   std::stringstream ss(line);
   std::string token;
   std::string word;
-  int game_ID;
+  int game_id;
 
   std::getline(ss, token, ':');
 
-  std::stringstream tokenStream(token);
+  std::stringstream token_stream(token);
 
-  tokenStream >> word >> game_ID;
+  token_stream >> word >> game_id;
 
-  Game current_game(game_ID);
+  Game current_game(game_id);
 
   while (std::getline(ss, token, ';')) {
     int red = extract_number(token, "red");
@@ -76,21 +83,26 @@ void process_line(const std::string &line) {
     current_game.rounds.push_back(round);
   }
 
-  // Print the current game object in a legible way
-  current_game.print_game_details();
-
-  // Ahora, currentGame contiene toda la información de este juego
-  // Puedes hacer algo con currentGame, como agregarlo a un vector de juegos o
-  // procesarlo más
+  return current_game.is_game_possible(12, 13, 14);
 }
 
 int main(int argc, char *argv[]) {
-  std::ifstream file("input.test");
+  std::ifstream file("input.prod");
   std::string line;
+
+  int sum = 0;
 
   if (file.is_open()) {
     while (getline(file, line)) {
-      process_line(line);
+      sum += process_line(line);
     }
+    file.close();
+  } else {
+    std::cerr << "Failed to open the input file" << std::endl;
+    return -1;
   }
+
+  std::cout << "Total sum: " << sum << std::endl;
+
+  return 0;
 }
