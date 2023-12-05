@@ -99,7 +99,7 @@ int main(int argc, char *argv[]) {
     file.close();
   } else {
     std::cerr << "Failed to open the input file" << std::endl;
-    return -1;
+    return 1;
   }
 
   std::cout << "Total sum: " << sum << std::endl;
