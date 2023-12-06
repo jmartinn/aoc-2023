@@ -4,9 +4,9 @@
 #include <string>
 #include <vector>
 
-bool isNumber(char c) { return c >= '0' && c <= '9'; }
+bool is_number(char c) { return c >= '0' && c <= '9'; }
 
-bool isDot(char c) { return c == '.'; }
+bool is_dot(char c) { return c == '.'; }
 
 const std::pair<int, int> dirs[] = {{-1, -1}, {0, -1}, {1, -1}, {-1, 0}, {1, 0},   {-1, 1}, {0, 1},  {1, 1}};
 
@@ -22,12 +22,12 @@ std::string get_full_number(const std::vector<std::string> &schema, int y, int x
   std::string number;
   int i = x;
   // Buscar hacia atrás para encontrar el inicio del número
-  while (i >= 0 && isNumber(schema[y][i])) {
+  while (i >= 0 && is_number(schema[y][i])) {
     i--;
   }
   i++; // Volver al inicio del número
   // Recoger todos los dígitos del número
-  while (i < schema[y].size() && isNumber(schema[y][i])) {
+  while (i < schema[y].size() && is_number(schema[y][i])) {
     number += schema[y][i];
     i++;
   }
@@ -54,11 +54,11 @@ int main() {
   std::set<int> processedStarts;
   for (int y = 0; y < schema.size(); ++y) {
     for (int x = 0; x < schema[y].size(); ++x) {
-      if (isNumber(schema[y][x])) {
+      if (is_number(schema[y][x])) {
         bool isAdjacentToSymbol = false;
         for (const auto &dir : dirs) {
           char adjacentChar = get_char(schema, y + dir.first, x + dir.second);
-          if (!isDot(adjacentChar) && !isNumber(adjacentChar) &&
+          if (!is_dot(adjacentChar) && !is_number(adjacentChar) &&
               adjacentChar != '\0') {
             isAdjacentToSymbol = true;
             break;
@@ -66,7 +66,7 @@ int main() {
         }
         if (isAdjacentToSymbol) {
           int numberStart = x;
-          while (numberStart > 0 && isNumber(schema[y][numberStart - 1])) {
+          while (numberStart > 0 && is_number(schema[y][numberStart - 1])) {
             numberStart--;
           }
           if (processedStarts.find(numberStart) == processedStarts.end()) {
