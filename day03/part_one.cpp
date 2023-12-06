@@ -1,37 +1,44 @@
 #include <fstream>
 #include <iostream>
+#include <set>
 #include <string>
 #include <vector>
 
-// Función para comprobar si un carácter es un número
-bool esNumero(char c) { return c >= '0' && c <= '9'; }
+bool isNumber(char c) { return c >= '0' && c <= '9'; }
 
-// Función para comprobar si un carácter es un símbolo (no es un punto ni un
-// número)
-bool esSimbolo(char c) { return c != '.' && !esNumero(c); }
+bool isDot(char c) { return c == '.'; }
 
-// Función para sumar los números adyacentes a símbolos
-int sumaNumerosAdyacentes(const std::vector<std::string> &esquema) {
-  int suma = 0;
+const std::pair<int, int> dirs[] = {{-1, -1}, {0, -1}, {1, -1}, {-1, 0}, {1, 0},   {-1, 1}, {0, 1},  {1, 1}};
 
-  // Recorre cada carácter del esquema
-  for (int i = 0; i < esquema.size(); i++) {
-    for (int j = 0; j < esquema[i].length(); j++) {
-      if (esNumero(esquema[i][j])) {
-        // Comprobar los caracteres adyacentes (incluyendo diagonales)
-        // Si alguno es un símbolo, suma el número
+char get_char(const std::vector<std::string> &schema, int y, int x) {
 
-        // Rellena aquí tu lógica para comprobar los adyacentes y sumar
-      }
-    }
+  if (y < 0 || y >= schema.size() || x < 0 || x >= schema[y].size()) {
+    return '\0';
   }
-  return suma;
+  return schema[y][x];
+}
+
+std::string get_full_number(const std::vector<std::string> &schema, int y, int x) {
+  std::string number;
+  int i = x;
+  // Buscar hacia atrás para encontrar el inicio del número
+  while (i >= 0 && isNumber(schema[y][i])) {
+    i--;
+  }
+  i++; // Volver al inicio del número
+  // Recoger todos los dígitos del número
+  while (i < schema[y].size() && isNumber(schema[y][i])) {
+    number += schema[y][i];
+    i++;
+  }
+  return number;
 }
 
 int main() {
   std::ifstream file("input.test");
   std::vector<std::string> schema;
   std::string line;
+  int sum = 0;
 
   if (!file.is_open()) {
     std::cerr << "Failed to open the input file" << std::endl;
@@ -42,14 +49,37 @@ int main() {
     schema.push_back(line);
   }
 
-  int counter = 0;
-  for (auto &line : schema) {
-    std::cout << "[" << counter << "]" << line << std::endl;
+  file.close();
 
-    counter++;
+  std::set<int> processedStarts;
+  for (int y = 0; y < schema.size(); ++y) {
+    for (int x = 0; x < schema[y].size(); ++x) {
+      if (isNumber(schema[y][x])) {
+        bool isAdjacentToSymbol = false;
+        for (const auto &dir : dirs) {
+          char adjacentChar = get_char(schema, y + dir.first, x + dir.second);
+          if (!isDot(adjacentChar) && !isNumber(adjacentChar) &&
+              adjacentChar != '\0') {
+            isAdjacentToSymbol = true;
+            break;
+          }
+        }
+        if (isAdjacentToSymbol) {
+          int numberStart = x;
+          while (numberStart > 0 && isNumber(schema[y][numberStart - 1])) {
+            numberStart--;
+          }
+          if (processedStarts.find(numberStart) == processedStarts.end()) {
+            std::string fullNumber = get_full_number(schema, y, numberStart);
+            sum += std::stoi(fullNumber);
+            processedStarts.insert(numberStart);
+          }
+        }
+      }
+    }
   }
 
-  file.close();
+  std::cout << "Sum of all valid numbers:" << sum << std::endl;
 
   return 0;
 }
