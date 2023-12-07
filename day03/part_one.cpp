@@ -24,12 +24,10 @@ char get_char(const std::vector<std::string> &schema, int y, int x) {
 std::string get_full_number(const std::vector<std::string> &schema, int y, int x) {
   std::string number;
   int i = x;
-  // Buscar hacia atrás para encontrar el inicio del número
   while (i >= 0 && is_number(schema[y][i])) {
     i--;
   }
-  i++; // Volver al inicio del número
-  // Recoger todos los dígitos del número
+  i++;
   while (i < schema[y].size() && is_number(schema[y][i])) {
     number += schema[y][i];
     i++;
@@ -82,7 +80,7 @@ int main() {
     }
   }
 
-  std::cout << "Sum of all valid numbers:" << sum << std::endl;
+  std::cout << "Sum of all valid numbers: " << sum << std::endl;
 
   return 0;
 }
